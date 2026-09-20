@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Python virtual environment
+venv/
+.venv/
+env/
+backend/venv/
+
+# Environment variables
+.env
+backend/.env
+
+# Flask uploads
+backend/uploads/
+
+# Node dependencies
+node_modules/
+frontend/node_modules/
+
+# Build files
+dist/
+frontend/dist/
+
+# Vite
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/

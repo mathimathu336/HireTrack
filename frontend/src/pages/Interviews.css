@@ -1,0 +1,935 @@
+/* =========================================
+   INTERVIEWS PAGE
+========================================= */
+
+.interviews-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  color: #172033;
+}
+
+/* =========================================
+   NAVBAR
+========================================= */
+
+.interviews-navbar {
+  width: 100%;
+  height: 72px;
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 40px;
+
+  gap: 6px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e2e8f0;
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  overflow: hidden;
+}
+
+/* LEFT BRAND */
+
+.brand {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 180px;
+  flex-shrink: 0;
+
+  white-space: nowrap;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.brand span {
+  font-size: 22px;
+  font-weight: 800;
+
+  color: #172033;
+
+  white-space: nowrap;
+}
+
+/* CENTER NAVIGATION */
+
+.navigation {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width: none;
+}
+
+.navigation::-webkit-scrollbar {
+  display: none;
+}
+
+.navigation a {
+  color: #64748b;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  padding: 9px 14px;
+
+  border-radius: 8px;
+
+  white-space: nowrap;
+
+  flex-shrink: 0;
+
+  text-decoration: none;
+
+  transition: all 0.2s ease;
+}
+
+.navigation a:hover {
+  color: #2563eb;
+  background: #f8fafc;
+}
+
+.navigation a.active {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+/* LOGOUT */
+
+.logout-button {
+  min-width: 80px;
+  flex-shrink: 0;
+
+  border: 1px solid #cbd5e1;
+
+  color: #475569;
+
+  background: #ffffff;
+
+  padding: 9px 16px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-align: center;
+
+  white-space: nowrap;
+
+  text-decoration: none;
+
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  border-color: #2563eb;
+
+  color: #2563eb;
+
+  background: #eff6ff;
+}
+
+/* =========================================
+   MAIN
+========================================= */
+
+.interviews-main {
+  width: 100%;
+  max-width: 1400px;
+
+  margin: 0 auto;
+
+  padding: 42px 40px 60px;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.interviews-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 30px;
+
+  margin-bottom: 30px;
+}
+
+.interviews-header h1 {
+  font-size: 32px;
+  line-height: 1.2;
+
+  color: #172033;
+
+  margin-bottom: 8px;
+}
+
+.interviews-header p {
+  color: #64748b;
+
+  font-size: 15px;
+}
+
+.interviews-count {
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 12px;
+
+  padding: 15px 20px;
+
+  color: #2563eb;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+/* =========================================
+   FORM CARD
+========================================= */
+
+.interview-form-card {
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 12px;
+
+  padding: 28px;
+
+  margin-bottom: 32px;
+}
+
+.interview-form-card h2 {
+  color: #172033;
+
+  font-size: 20px;
+
+  margin-bottom: 24px;
+}
+
+/* =========================================
+   FORM
+========================================= */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.form-group label {
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+
+  height: 44px;
+
+  padding: 0 13px;
+
+  background: #ffffff;
+
+  border: 1px solid #cbd5e1;
+
+  border-radius: 8px;
+
+  color: #172033;
+
+  font-size: 14px;
+
+  outline: none;
+
+  transition: 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.form-buttons {
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 24px;
+}
+
+.primary-button {
+  height: 44px;
+
+  padding: 0 22px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.primary-button:hover {
+  background: #1d4ed8;
+}
+
+.cancel-button {
+  height: 44px;
+
+  padding: 0 20px;
+
+  border: 1px solid #cbd5e1;
+
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background: #f8fafc;
+}
+
+/* =========================================
+   LIST
+========================================= */
+
+.interviews-list {
+  margin-top: 30px;
+}
+
+.section-title {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+}
+
+.section-title h2 {
+  color: #172033;
+
+  font-size: 21px;
+}
+
+.section-title span {
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  padding: 7px 12px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* =========================================
+   CARDS
+========================================= */
+
+.interview-cards {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 20px;
+}
+
+.interview-card {
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 12px;
+
+  padding: 22px;
+
+  transition: 0.2s ease;
+}
+
+.interview-card:hover {
+  border-color: #bfdbfe;
+
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.interview-card-top {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 20px;
+}
+
+.interview-card h3 {
+  color: #172033;
+
+  font-size: 17px;
+
+  margin-bottom: 5px;
+}
+
+.interview-role {
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+.status-badge {
+  padding: 6px 10px;
+
+  border-radius: 20px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+/* =========================================
+   DETAILS
+========================================= */
+
+.interview-details {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 12px;
+
+  padding-top: 18px;
+
+  border-top: 1px solid #e2e8f0;
+}
+
+.interview-details > div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.detail-label {
+  color: #94a3b8;
+
+  font-size: 11px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+
+  font-weight: 700;
+}
+
+.interview-details > div > span:last-child {
+  color: #334155;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+/* =========================================
+   ACTION BUTTONS
+========================================= */
+
+.interview-actions {
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 20px;
+}
+
+.edit-button,
+.delete-button {
+  flex: 1;
+
+  height: 38px;
+
+  border-radius: 7px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.edit-button {
+  background: #eff6ff;
+
+  border: 1px solid #bfdbfe;
+
+  color: #2563eb;
+}
+
+.delete-button {
+  background: #ffffff;
+
+  border: 1px solid #fecaca;
+
+  color: #dc2626;
+}
+
+.edit-button:hover {
+  background: #dbeafe;
+}
+
+.delete-button:hover {
+  background: #fef2f2;
+}
+
+/* =========================================
+   EMPTY STATE
+========================================= */
+
+.empty-state {
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 12px;
+
+  padding: 60px 20px;
+
+  text-align: center;
+}
+
+.empty-state h3 {
+  color: #172033;
+
+  font-size: 19px;
+
+  margin-bottom: 7px;
+}
+
+.empty-state p {
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+/* =========================================
+   DARK MODE
+========================================= */
+
+.dark-mode .interviews-page {
+  background: #0f172a;
+
+  color: #f8fafc;
+}
+
+.dark-mode .interviews-navbar {
+  background: #1e293b;
+
+  border-color: #334155;
+}
+
+.dark-mode .brand span {
+  color: #f8fafc;
+}
+
+.dark-mode .navigation a {
+  color: #cbd5e1;
+}
+
+.dark-mode .navigation a:hover {
+  background: #334155;
+
+  color: #ffffff;
+}
+
+.dark-mode .navigation a.active {
+  background: #172554;
+
+  color: #60a5fa;
+}
+
+.dark-mode .logout-button {
+  background: #1e293b;
+
+  border-color: #475569;
+
+  color: #cbd5e1;
+}
+
+.dark-mode .logout-button:hover {
+  border-color: #60a5fa;
+
+  color: #60a5fa;
+
+  background: #172554;
+}
+
+.dark-mode .interviews-header h1,
+.dark-mode .interview-form-card h2,
+.dark-mode .section-title h2,
+.dark-mode .interview-card h3 {
+  color: #f8fafc;
+}
+
+.dark-mode .interviews-header p,
+.dark-mode .interview-role {
+  color: #cbd5e1;
+}
+
+.dark-mode .interviews-count,
+.dark-mode .interview-form-card,
+.dark-mode .interview-card,
+.dark-mode .empty-state {
+  background: #1e293b;
+
+  border-color: #334155;
+}
+
+.dark-mode .form-group label {
+  color: #e2e8f0;
+}
+
+.dark-mode .form-group input,
+.dark-mode .form-group select {
+  background: #0f172a;
+
+  border-color: #475569;
+
+  color: #f8fafc;
+}
+
+.dark-mode .cancel-button {
+  background: #1e293b;
+
+  border-color: #475569;
+
+  color: #cbd5e1;
+}
+
+.dark-mode .cancel-button:hover {
+  background: #334155;
+}
+
+.dark-mode .interview-details {
+  border-color: #334155;
+}
+
+.dark-mode .interview-details > div > span:last-child {
+  color: #cbd5e1;
+}
+
+.dark-mode .delete-button {
+  background: #1e293b;
+
+  border-color: #7f1d1d;
+
+  color: #f87171;
+}
+
+.dark-mode .empty-state h3 {
+  color: #f8fafc;
+}
+
+.dark-mode .empty-state p {
+  color: #cbd5e1;
+}
+
+/* =========================================
+   RESPONSIVE - 1100px
+========================================= */
+
+@media (max-width: 1100px) {
+
+  .interviews-navbar {
+    padding: 0 25px;
+  }
+
+  .brand {
+    min-width: 180px;
+  }
+
+  .navigation a {
+    padding: 9px 9px;
+
+    font-size: 12px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .interview-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* =========================================
+   RESPONSIVE - 800px
+========================================= */
+
+@media (max-width: 800px) {
+
+  .interviews-navbar {
+    height: 72px;
+    min-height: 72px;
+
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 20px;
+
+    gap: 6px;
+
+    overflow: hidden;
+  }
+
+  .brand {
+    min-width: 180px;
+
+    flex-shrink: 0;
+  }
+
+  .brand span {
+    display: inline;
+  }
+
+  .navigation {
+    flex: 1;
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scrollbar-width: none;
+  }
+
+  .navigation::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navigation a {
+    flex-shrink: 0;
+
+    white-space: nowrap;
+
+    padding: 9px 14px;
+
+    font-size: 14px;
+  }
+
+  .logout-button {
+    min-width: 80px;
+
+    flex-shrink: 0;
+
+    padding: 9px 16px;
+
+    font-size: 14px;
+
+    text-align: center;
+  }
+
+  .interviews-main {
+    padding: 30px 20px 45px;
+  }
+
+  .interviews-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 15px;
+  }
+
+  .interviews-count {
+    align-self: flex-start;
+  }
+
+  .interview-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   RESPONSIVE - 700px
+========================================= */
+
+@media (max-width: 700px) {
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .interview-form-card {
+    padding: 22px;
+  }
+
+  .interview-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   RESPONSIVE - 550px
+========================================= */
+
+@media (max-width: 550px) {
+
+  .interviews-navbar {
+    height: 72px;
+    min-height: 72px;
+
+    padding: 0 15px;
+
+    gap: 6px;
+  }
+
+  .brand {
+    min-width: 180px;
+
+    flex-shrink: 0;
+  }
+
+  .brand span {
+    display: inline;
+  }
+
+  .navigation {
+    gap: 6px;
+
+    justify-content: flex-start;
+  }
+
+  .navigation a {
+    padding: 9px 14px;
+
+    font-size: 14px;
+  }
+
+  .logout-button {
+    min-width: 80px;
+
+    padding: 9px 16px;
+
+    font-size: 14px;
+  }
+
+  .interviews-main {
+    padding: 25px 15px 40px;
+  }
+
+  .interviews-header h1 {
+    font-size: 27px;
+  }
+
+  .interview-form-card {
+    padding: 18px;
+  }
+
+  .section-title {
+    align-items: flex-start;
+
+    gap: 12px;
+  }
+
+  .interview-details {
+    grid-template-columns: 1fr;
+  }
+
+  .interview-actions {
+    flex-direction: column;
+  }
+}
