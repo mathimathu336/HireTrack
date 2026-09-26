@@ -737,3 +737,10 @@ def save_profile():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    @app.route("/api/db-test")
+def db_test():
+    try:
+        db.session.execute(db.text("SELECT 1"))
+        return {"status": "Database connected"}
+    except Exception as e:
+        return {"status": "Database failed", "error": str(e)}, 500
