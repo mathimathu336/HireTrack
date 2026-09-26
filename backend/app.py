@@ -737,7 +737,7 @@ def save_profile():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    @app.route("/api/db-test")
+@app.route("/api/db-test")
 def db_test():
     try:
         db.session.execute(db.text("SELECT 1"))
