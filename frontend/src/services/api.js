@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://hiretrack-zgq2.onrender.com/api",
+  baseURL: "http://127.0.0.1:5000/api",
 });
 
 export default API;

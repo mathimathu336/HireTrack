@@ -15,6 +15,8 @@ function Dashboard() {
   }, []);
 
   const loadDashboardData = async () => {
+   
+    console.log("Dashboard loading...");
     try {
       const [
         applicationsResponse,
