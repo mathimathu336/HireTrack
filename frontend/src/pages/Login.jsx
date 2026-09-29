@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
+import supabase from "../services/supabase";
 
 function Login({ darkMode }) {
   const navigate = useNavigate();
@@ -20,16 +21,26 @@ function Login({ darkMode }) {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!form.email || !form.password) {
-      alert("Please enter email and password");
-      return;
-    }
+  if (!form.email || !form.password) {
+    alert("Please enter email and password");
+    return;
+  }
 
-    navigate("/dashboard");
-  };
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: form.email,
+    password: form.password,
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  navigate("/dashboard");
+};
 
   return (
     <div className="login-page">

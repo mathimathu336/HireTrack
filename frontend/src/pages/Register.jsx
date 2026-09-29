@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Register.css";
+import supabase from "../services/supabase";
 
 function Register({ darkMode }) {
   const navigate = useNavigate();
@@ -18,8 +19,7 @@ function Register({ darkMode }) {
       [e.target.name]: e.target.value,
     });
   };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -37,11 +37,24 @@ function Register({ darkMode }) {
       return;
     }
 
-    alert("Account created successfully!");
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          name: form.name,
+        },
+      },
+    });
 
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("Account created! Please check your email for verification.");
     navigate("/");
   };
-
   return (
     <div className="register-page">
 
