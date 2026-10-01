@@ -1,10 +1,12 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory,g
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from supabase import create_client
 import os
+
 
 
 # =========================================================
@@ -12,7 +14,14 @@ import os
 # =========================================================
 
 load_dotenv()
+# SUPABASE AUTH
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
+supabase = create_client(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+)
 
 # =========================================================
 # FLASK APP
@@ -32,6 +41,32 @@ CORS(
         }
     }
 )
+@app.before_request
+def verify_user():
+    if request.method == "OPTIONS":
+        return
+    # Public route
+    if not request.path.startswith("/api/") or request.path.rstrip("/") == "/api/db-test":
+        return
+
+    auth_header = request.headers.get("Authorization", "")
+
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Authentication required"}), 401
+
+    token = auth_header.split(" ", 1)[1]
+
+    try:
+        user_response = supabase.auth.get_user(token)
+        user = user_response.user
+
+        if not user:
+            return jsonify({"error": "Invalid session"}), 401
+
+        g.user_id = user.id
+
+    except Exception:
+        return jsonify({"error": "Invalid or expired session"}), 401
 
 
 # =========================================================
@@ -119,6 +154,8 @@ def db_test():
 
 # ---------------- GET ALL APPLICATIONS ----------------
 
+# ---------------- GET APPLICATIONS ----------------
+
 @app.route("/api/applications", methods=["GET"])
 def get_applications():
 
@@ -126,30 +163,20 @@ def get_applications():
         db.text("""
             SELECT *
             FROM applications
+            WHERE user_id = :user_id
             ORDER BY created_at DESC
-        """)
+        """),
+        {"user_id": g.user_id}
     ).mappings().all()
 
     result = []
 
     for application in applications:
-
         data = dict(application)
 
-        if data.get("application_date"):
-            data["application_date"] = (
-                data["application_date"].isoformat()
-            )
-
-        if data.get("created_at"):
-            data["created_at"] = (
-                data["created_at"].isoformat()
-            )
-
-        if data.get("updated_at"):
-            data["updated_at"] = (
-                data["updated_at"].isoformat()
-            )
+        for field in ["application_date", "created_at", "updated_at"]:
+            if data.get(field):
+                data[field] = data[field].isoformat()
 
         result.append(data)
 
@@ -161,18 +188,13 @@ def get_applications():
 @app.route("/api/applications", methods=["POST"])
 def add_application():
 
-    data = request.get_json()
-
-    company = data.get("company")
-    role = data.get("role")
-    status = data.get("status")
-    location = data.get("location")
-    application_date = data.get("application_date")
+    data = request.get_json() or {}
 
     db.session.execute(
         db.text("""
             INSERT INTO applications
             (
+                user_id,
                 company,
                 role,
                 status,
@@ -181,6 +203,7 @@ def add_application():
             )
             VALUES
             (
+                :user_id,
                 :company,
                 :role,
                 :status,
@@ -189,11 +212,12 @@ def add_application():
             )
         """),
         {
-            "company": company,
-            "role": role,
-            "status": status,
-            "location": location,
-            "application_date": application_date
+            "user_id": g.user_id,
+            "company": data.get("company"),
+            "role": data.get("role"),
+            "status": data.get("status"),
+            "location": data.get("location"),
+            "application_date": data.get("application_date")
         }
     )
 
@@ -205,18 +229,11 @@ def add_application():
 
 
 # ---------------- UPDATE APPLICATION ----------------
-# UUID ID -> <id>
 
 @app.route("/api/applications/<id>", methods=["PUT"])
 def update_application(id):
 
-    data = request.get_json()
-
-    company = data.get("company")
-    role = data.get("role")
-    status = data.get("status")
-    location = data.get("location")
-    application_date = data.get("application_date")
+    data = request.get_json() or {}
 
     result = db.session.execute(
         db.text("""
@@ -229,24 +246,23 @@ def update_application(id):
                 application_date = :application_date,
                 updated_at = NOW()
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
             "id": id,
-            "company": company,
-            "role": role,
-            "status": status,
-            "location": location,
-            "application_date": application_date
+            "user_id": g.user_id,
+            "company": data.get("company"),
+            "role": data.get("role"),
+            "status": data.get("status"),
+            "location": data.get("location"),
+            "application_date": data.get("application_date")
         }
     )
 
     db.session.commit()
 
     if result.rowcount == 0:
-
-        return jsonify({
-            "message": "Application not found"
-        }), 404
+        return jsonify({"message": "Application not found"}), 404
 
     return jsonify({
         "message": "Application updated successfully!"
@@ -262,29 +278,29 @@ def delete_application(id):
         db.text("""
             DELETE FROM applications
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
-            "id": id
+            "id": id,
+            "user_id": g.user_id
         }
     )
 
     db.session.commit()
 
     if result.rowcount == 0:
-
-        return jsonify({
-            "message": "Application not found"
-        }), 404
+        return jsonify({"message": "Application not found"}), 404
 
     return jsonify({
         "message": "Application deleted successfully!"
     }), 200
 
-
 # =========================================================
 # INTERVIEWS
 # =========================================================
 
+
+# ---------------- GET INTERVIEWS ----------------
 
 # ---------------- GET INTERVIEWS ----------------
 
@@ -295,27 +311,24 @@ def get_interviews():
         db.text("""
             SELECT *
             FROM interviews
+            WHERE user_id = :user_id
             ORDER BY id DESC
-        """)
+        """),
+        {"user_id": g.user_id}
     ).mappings().all()
 
     return jsonify([
         {
             **dict(interview),
-
             "date": (
                 interview["date"].isoformat()
-                if interview["date"]
-                else None
+                if interview["date"] else None
             ),
-
             "time": (
                 interview["time"].isoformat()
-                if interview["time"]
-                else None
+                if interview["time"] else None
             )
         }
-
         for interview in interviews
     ])
 
@@ -325,19 +338,13 @@ def get_interviews():
 @app.route("/api/interviews", methods=["POST"])
 def add_interview():
 
-    data = request.get_json()
-
-    company = data.get("company")
-    role = data.get("role")
-    date = data.get("date")
-    time = data.get("time")
-    interview_type = data.get("type")
-    status = data.get("status")
+    data = request.get_json() or {}
 
     db.session.execute(
         db.text("""
             INSERT INTO interviews
             (
+                user_id,
                 company,
                 role,
                 date,
@@ -347,6 +354,7 @@ def add_interview():
             )
             VALUES
             (
+                :user_id,
                 :company,
                 :role,
                 :date,
@@ -356,12 +364,13 @@ def add_interview():
             )
         """),
         {
-            "company": company,
-            "role": role,
-            "date": date,
-            "time": time,
-            "type": interview_type,
-            "status": status
+            "user_id": g.user_id,
+            "company": data.get("company"),
+            "role": data.get("role"),
+            "date": data.get("date"),
+            "time": data.get("time"),
+            "type": data.get("type"),
+            "status": data.get("status")
         }
     )
 
@@ -377,14 +386,7 @@ def add_interview():
 @app.route("/api/interviews/<int:id>", methods=["PUT"])
 def update_interview(id):
 
-    data = request.get_json()
-
-    company = data.get("company")
-    role = data.get("role")
-    date = data.get("date")
-    time = data.get("time")
-    interview_type = data.get("type")
-    status = data.get("status")
+    data = request.get_json() or {}
 
     result = db.session.execute(
         db.text("""
@@ -397,25 +399,24 @@ def update_interview(id):
                 type = :type,
                 status = :status
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
             "id": id,
-            "company": company,
-            "role": role,
-            "date": date,
-            "time": time,
-            "type": interview_type,
-            "status": status
+            "user_id": g.user_id,
+            "company": data.get("company"),
+            "role": data.get("role"),
+            "date": data.get("date"),
+            "time": data.get("time"),
+            "type": data.get("type"),
+            "status": data.get("status")
         }
     )
 
     db.session.commit()
 
     if result.rowcount == 0:
-
-        return jsonify({
-            "message": "Interview not found"
-        }), 404
+        return jsonify({"message": "Interview not found"}), 404
 
     return jsonify({
         "message": "Interview updated successfully!"
@@ -431,29 +432,29 @@ def delete_interview(id):
         db.text("""
             DELETE FROM interviews
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
-            "id": id
+            "id": id,
+            "user_id": g.user_id
         }
     )
 
     db.session.commit()
 
     if result.rowcount == 0:
-
-        return jsonify({
-            "message": "Interview not found"
-        }), 404
+        return jsonify({"message": "Interview not found"}), 404
 
     return jsonify({
         "message": "Interview deleted successfully!"
     }), 200
 
-
 # =========================================================
 # SKILLS
 # =========================================================
 
+
+# ---------------- GET SKILLS ----------------
 
 # ---------------- GET SKILLS ----------------
 
@@ -464,8 +465,10 @@ def get_skills():
         db.text("""
             SELECT *
             FROM skills
+            WHERE user_id = :user_id
             ORDER BY id DESC
-        """)
+        """),
+        {"user_id": g.user_id}
     ).mappings().all()
 
     return jsonify([
@@ -479,27 +482,27 @@ def get_skills():
 @app.route("/api/skills", methods=["POST"])
 def add_skill():
 
-    data = request.get_json()
-
-    name = data.get("name")
-    level = data.get("level")
+    data = request.get_json() or {}
 
     db.session.execute(
         db.text("""
             INSERT INTO skills
             (
+                user_id,
                 name,
                 level
             )
             VALUES
             (
+                :user_id,
                 :name,
                 :level
             )
         """),
         {
-            "name": name,
-            "level": level
+            "user_id": g.user_id,
+            "name": data.get("name"),
+            "level": data.get("level")
         }
     )
 
@@ -515,10 +518,7 @@ def add_skill():
 @app.route("/api/skills/<int:id>", methods=["PUT"])
 def update_skill(id):
 
-    data = request.get_json()
-
-    name = data.get("name")
-    level = data.get("level")
+    data = request.get_json() or {}
 
     result = db.session.execute(
         db.text("""
@@ -527,21 +527,20 @@ def update_skill(id):
                 name = :name,
                 level = :level
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
             "id": id,
-            "name": name,
-            "level": level
+            "user_id": g.user_id,
+            "name": data.get("name"),
+            "level": data.get("level")
         }
     )
 
     db.session.commit()
 
     if result.rowcount == 0:
-
-        return jsonify({
-            "message": "Skill not found"
-        }), 404
+        return jsonify({"message": "Skill not found"}), 404
 
     return jsonify({
         "message": "Skill updated successfully!"
@@ -557,31 +556,29 @@ def delete_skill(id):
         db.text("""
             DELETE FROM skills
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
-            "id": id
+            "id": id,
+            "user_id": g.user_id
         }
     )
 
     db.session.commit()
 
     if result.rowcount == 0:
-
-        return jsonify({
-            "message": "Skill not found"
-        }), 404
+        return jsonify({"message": "Skill not found"}), 404
 
     return jsonify({
         "message": "Skill deleted successfully!"
     }), 200
-
-
 # =========================================================
 # RESUMES
 # =========================================================
 
 
-# ---------------- GET ALL RESUMES ----------------
+
+# ---------------- GET RESUMES ----------------
 
 @app.route("/api/resumes", methods=["GET"])
 def get_resumes():
@@ -590,8 +587,10 @@ def get_resumes():
         db.text("""
             SELECT *
             FROM resumes
+            WHERE user_id = :user_id
             ORDER BY id DESC
-        """)
+        """),
+        {"user_id": g.user_id}
     ).mappings().all()
 
     return jsonify([
@@ -610,17 +609,16 @@ def get_single_resume(id):
             SELECT *
             FROM resumes
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
-            "id": id
+            "id": id,
+            "user_id": g.user_id
         }
     ).mappings().first()
 
     if not resume:
-
-        return jsonify({
-            "message": "Resume not found"
-        }), 404
+        return jsonify({"message": "Resume not found"}), 404
 
     return jsonify(dict(resume))
 
@@ -645,7 +643,6 @@ def add_resume():
     pdf = request.files.get("pdf")
 
     if not name:
-
         return jsonify({
             "message": "Resume name is required"
         }), 400
@@ -653,27 +650,17 @@ def add_resume():
     pdf_filename = None
     pdf_path = None
 
-    # ---------------- PDF ----------------
-
     if pdf and pdf.filename:
 
         if not allowed_file(pdf.filename):
-
             return jsonify({
                 "message": "Only PDF files are allowed"
             }), 400
 
-        original_filename = secure_filename(
-            pdf.filename
-        )
+        original_filename = secure_filename(pdf.filename)
 
-        timestamp = datetime.now().strftime(
-            "%Y%m%d%H%M%S"
-        )
-
-        final_filename = (
-            f"{timestamp}_{original_filename}"
-        )
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        final_filename = f"{timestamp}_{original_filename}"
 
         pdf.save(
             os.path.join(
@@ -685,12 +672,11 @@ def add_resume():
         pdf_filename = original_filename
         pdf_path = final_filename
 
-    # ---------------- DATABASE ----------------
-
     db.session.execute(
         db.text("""
             INSERT INTO resumes
             (
+                user_id,
                 name,
                 version,
                 status,
@@ -706,6 +692,7 @@ def add_resume():
             )
             VALUES
             (
+                :user_id,
                 :name,
                 :version,
                 :status,
@@ -721,12 +708,11 @@ def add_resume():
             )
         """),
         {
+            "user_id": g.user_id,
             "name": name,
             "version": version,
             "status": status,
-            "updated": datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            ),
+            "updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "email": email,
             "phone": phone,
             "education": education,
@@ -755,17 +741,16 @@ def get_resume_pdf(id):
             SELECT pdf_path
             FROM resumes
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
-            "id": id
+            "id": id,
+            "user_id": g.user_id
         }
     ).mappings().first()
 
     if not resume or not resume["pdf_path"]:
-
-        return jsonify({
-            "message": "PDF not found"
-        }), 404
+        return jsonify({"message": "PDF not found"}), 404
 
     return send_from_directory(
         app.config["UPLOAD_FOLDER"],
@@ -783,19 +768,16 @@ def delete_resume(id):
             SELECT pdf_path
             FROM resumes
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
-            "id": id
+            "id": id,
+            "user_id": g.user_id
         }
     ).mappings().first()
 
     if not resume:
-
-        return jsonify({
-            "message": "Resume not found"
-        }), 404
-
-    # Delete PDF file
+        return jsonify({"message": "Resume not found"}), 404
 
     if resume["pdf_path"]:
 
@@ -805,18 +787,17 @@ def delete_resume(id):
         )
 
         if os.path.exists(file_path):
-
             os.remove(file_path)
-
-    # Delete database record
 
     db.session.execute(
         db.text("""
             DELETE FROM resumes
             WHERE id = :id
+              AND user_id = :user_id
         """),
         {
-            "id": id
+            "id": id,
+            "user_id": g.user_id
         }
     )
 
@@ -825,11 +806,11 @@ def delete_resume(id):
     return jsonify({
         "message": "Resume deleted successfully!"
     }), 200
-
-
 # =========================================================
 # PROFILE
 # =========================================================
+
+
 
 
 # ---------------- GET PROFILE ----------------
@@ -841,12 +822,13 @@ def get_profile():
         db.text("""
             SELECT *
             FROM profile
+            WHERE user_id = :user_id
             LIMIT 1
-        """)
+        """),
+        {"user_id": g.user_id}
     ).mappings().first()
 
     if profile:
-
         return jsonify(dict(profile))
 
     return jsonify(None)
@@ -857,7 +839,7 @@ def get_profile():
 @app.route("/api/profile", methods=["POST"])
 def save_profile():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     name = data.get("name")
     email = data.get("email")
@@ -869,8 +851,10 @@ def save_profile():
         db.text("""
             SELECT id
             FROM profile
+            WHERE user_id = :user_id
             LIMIT 1
-        """)
+        """),
+        {"user_id": g.user_id}
     ).first()
 
     if existing:
@@ -885,9 +869,11 @@ def save_profile():
                     college = :college,
                     role = :role
                 WHERE id = :id
+                  AND user_id = :user_id
             """),
             {
                 "id": existing.id,
+                "user_id": g.user_id,
                 "name": name,
                 "email": email,
                 "phone": phone,
@@ -902,6 +888,7 @@ def save_profile():
             db.text("""
                 INSERT INTO profile
                 (
+                    user_id,
                     name,
                     email,
                     phone,
@@ -910,6 +897,7 @@ def save_profile():
                 )
                 VALUES
                 (
+                    :user_id,
                     :name,
                     :email,
                     :phone,
@@ -918,6 +906,7 @@ def save_profile():
                 )
             """),
             {
+                "user_id": g.user_id,
                 "name": name,
                 "email": email,
                 "phone": phone,
@@ -931,7 +920,6 @@ def save_profile():
     return jsonify({
         "message": "Profile saved successfully!"
     }), 201
-
 
 # =========================================================
 # RUN APP
