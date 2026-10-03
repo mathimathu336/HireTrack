@@ -125,13 +125,22 @@ function Resume() {
       alert("Failed to delete resume");
     }
   };
+const openPdf = async (id) => {
+  try {
+    const response = await API.get(`/resumes/${id}/pdf`, {
+      responseType: "blob",
+    });
 
-  const openPdf = (id) => {
-    window.open(
-      `http://127.0.0.1:5000/api/resumes/${id}/pdf`,
-      "_blank"
+    const pdfUrl = window.URL.createObjectURL(
+      new Blob([response.data], { type: "application/pdf" })
     );
-  };
+
+    window.open(pdfUrl, "_blank");
+  } catch (error) {
+    console.error("PDF open failed:", error);
+    alert("Unable to open PDF");
+  }
+};
 
   return (
     <div className="resume-page">
